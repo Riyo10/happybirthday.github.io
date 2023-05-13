@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Happy Birthday Mana</title>
+    <style>
+      html {
+        background: black;
+        background-size: cover;
+        position: relative;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        display: block;
+        overflow: hidden;
+      }
+      h1 {
+        position: relative;
+        bottom: 50px;
+        display: inline-block;
+        font-size: 80px;
+        line-height: 0.9;
+        padding: 20px;
+        font-family: sans-serif;
+        text-transform: uppercase;
+        background: radial-gradient(
+            circle farthest-corner at center center,
+            rgb(174, 8, 220),
+            #cb6607
+          )
+          no-repeat;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation-name: textsize;
+        animation-duration: 5s;
+        animation-iteration-count: infinite;
+      }
+      @keyframes textsize {
+        0% {
+          line-height: 200px;
+          opacity: 1;
+        }
+        50% {
+          line-height: 100px;
+          opacity: 0.7;
+        }
+        100% {
+          line-height: 10px;
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Happy Birthday<br />Mana</h1>
+    <canvas id="canvas"></canvas>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+    <script>
+      $(function () {
+        var canvas = $("#canvas")[0];
+        canvas.width = $(window).width();
+        canvas.height = $(window).height();
+        var ctx = canvas.getContext("2d"); // resize
+        $(window).on("resize", function () {
+          canvas.width = $(window).width();
+          canvas.height = $(window).height();
+          ctx.fillStyle = "#000003";
+          ctx.fillRect(20, 30, canvas.width, canvas.height);
+          center = {
+            x: canvas.width / 62,
+            y: canvas.height / 2,
+          };
+        }); // init
+
+        ctx.fillStyle = "#000003";
+        ctx.fillRect(0, 0, canvas.width, canvas.height); // objects
+        var listFire = [];
+        var listFirework = [];
+        var listText = [];
+        var listSpecial = [];
+        var listSpark = [];
+        var lights = [];
+        var fireNumber = 10;
+        var center = {
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+        };
+        var range = 100;
+        var fired = 0;
+        var onHold = 0;
+        var supprise = false;
+        var textIndex = 0;
+        var actions = [
+          makeDoubleFullCircleFirework,
+          makePlanetCircleFirework,
+          makeFullCircleFirework,
+          makeDoubleCircleFirework,
+          makeHeartFirework,
+          makeCircleFirework,
+          makeRandomFirework,
+        ];
+        for (var i = 0; i < fireNumber; i++) {
+          var fire = {
+            x: (Math.random() * range) / 2 - range / 4 + center.x,
+            y: Math.random() * range * 2.5 + canvas.height,
+            size: Math.random() + 0.31,
+            fill: "#ff3",
+            vx: Math.random() - 0.5,
+            vy: -(Math.random() + 4),
+            ax: Math.random() * 0.06 - 0.03,
+            delay: Math.round(Math.random() * range) + range * 4,
+            hold: false,
+            alpha: 1,
+            far: Math.random() * range + (center.y - range),
+          };
+          fire.base = {
+            x: fire.x,
+            y: fire.y,
+            vx: fire.vx,
+            vy: fire.vy,
+          }; //
+          listFire.push(fire); /*playLaunchSound();*/ // play sound
+        } /*var listExpSound = $('audio.exp'); // define array of sound
+  var listLaunchSound = $('audio.launch');*/ /*playExpSound();*/ // play sound // // Fireworks by Tristan McCullen in 2017!
+        function initSpark() {
+          var x = Math.random() * range * 3 - range * 1.5 + center.x;
+          var vx = Math.random() - 0.5;
+          var vy = -(Math.random() + 4);
+          var ax = Math.random() * 0.04 - 0.02;
+          var far = Math.random() * range * 4 - range + center.y;
+          var direct = ax * 10 * Math.PI;
+          var max = fireNumber * 0.5;
+          for (var i = 0; i < max; i++) {
+            var special = {
+              x: x,
+              y: Math.random() * range * 0.25 + canvas.height,
+              size: Math.random() + 2,
+              fill: "#ff3",
+              vx: vx,
+              vy: vy,
+              ax: ax,
+              direct: direct,
+              alpha: 1,
+            };
+            special.far = far - (special.y - canvas.height);
+            listSpecial.push(special); /*playLaunchSound();*/ // play sound
+          }
+        }
+
+        function randColor() {
+          var r = Math.floor(Math.random() * 256);
+          var g = Math.floor(Math.random() * 256);
+          var b = Math.floor(Math.random() * 256);
+          var color = "rgb($r, $g, $b)";
+          color = color.replace("$r", r);
+          color = color.replace("$g", g);
+          color = color.replace("$b", b);
+          return color;
+        } /*function playExpSound() { //Experimental feature of adding sounds(!)
+    var sound = listExpSound[Math.floor(Math.random() * listExpSound.length)];
+    sound.volume = Math.random() * 0.4 + 0.1;
+    sound.play();
+  } */ /*setTimeout(function() { //function playLaunchSound() {
+      var sound = listLaunchSound[Math.floor(Math.random() * listLaunchSound.length)];
+      sound.volume = 0.05;
+      sound.play();
+    }, 200);
+  }*/
+
+        // Fireworks by Tristan McCullen in 2017!
+        function makeCircleFirework(fire) {
+          var color = randColor();
+          var velocity = Math.random() * 2 + 6;
+          var max = fireNumber * 5;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              vy: Math.sin(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              ay: 0.04,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 2,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          return color;
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        function makeDoubleCircleFirework(fire) {
+          var color = randColor();
+          var velocity = Math.random() * 2 + 8;
+          var max = fireNumber * 3;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              vy: Math.sin(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              ay: 0.04,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          color = randColor();
+          velocity = Math.random() * 3 + 4;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              vy: Math.sin(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              ay: 0.04,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          return color;
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        function makePlanetCircleFirework(fire) {
+          var color = "#aa0609";
+          var velocity = Math.random() * 2 + 4;
+          var max = fireNumber * 2;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              vy: Math.sin(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              ay: 0.04,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          max = fireNumber * 4;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity * Math.random(),
+              vy: Math.sin(rad) * velocity * Math.random(),
+              ay: 0.04,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          max = fireNumber * 3;
+          color = "#ff9";
+          var rotate = Math.random() * Math.PI * 2;
+          var vx = velocity * (Math.random() + 2);
+          var vy = velocity * 0.6;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max; // calc x, y for ellipse
+            var cx = Math.cos(rad) * vx + (Math.random() - 0.5) * 0.5;
+            var cy = Math.sin(rad) * vy + (Math.random() - 0.5) * 0.5;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: cx * Math.cos(rotate) - cy * Math.sin(rotate), // rotate x ellipse
+              vy: cx * Math.sin(rotate) + cy * Math.cos(rotate), // rotate y ellipse
+              ay: 0.02,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          return "#aa0609";
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        function makeFullCircleFirework(fire) {
+          var color = randColor();
+          var velocity = Math.random() * 8 + 8;
+          var max = fireNumber * 3;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              vy: Math.sin(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              ay: 0.06,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          max = fireNumber * Math.round(Math.random() * 4 + 4);
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity * Math.random(),
+              vy: Math.sin(rad) * velocity * Math.random(),
+              ay: 0.06,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          return color;
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        function makeDoubleFullCircleFirework(fire) {
+          var color = randColor();
+          var velocity = Math.random() * 8 + 8;
+          var max = fireNumber * 3;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              vy: Math.sin(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              ay: 0.04,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          color = randColor();
+          velocity = Math.random() * 3 + 4;
+          max = fireNumber * 2;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              vy: Math.sin(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              ay: 0.06,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          max = fireNumber * 4;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * velocity * Math.random(),
+              vy: Math.sin(rad) * velocity * Math.random(),
+              ay: 0.06,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          return color;
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        function makeHeartFirework(fire) {
+          var color = randColor();
+          var velocity = Math.random() * 3 + 3;
+          var max = fireNumber * 5;
+          var rotate = Math.random() * Math.PI * 2;
+          for (var i = 0; i < max; i++) {
+            var rad = (i * Math.PI * 2) / max + rotate;
+            var v, p;
+            if (rad - rotate < Math.PI * 0.5) {
+              p = (rad - rotate) / (Math.PI * 0.5);
+              v = velocity + velocity * p;
+            } else if (rad - rotate > Math.PI * 0.5 && rad - rotate < Math.PI) {
+              p = (rad - rotate - Math.PI * 0.5) / (Math.PI * 0.5);
+              v = velocity * (2 - p);
+            } else if (rad - rotate > Math.PI && rad - rotate < Math.PI * 1.5) {
+              p = (rad - rotate - Math.PI) / (Math.PI * 0.5);
+              v = velocity * (1 - p);
+            } else if (
+              rad - rotate > Math.PI * 1.5 &&
+              rad - rotate < Math.PI * 2
+            ) {
+              p = (rad - rotate - Math.PI * 1.5) / (Math.PI * 0.5);
+              v = velocity * p;
+            } else {
+              v = velocity;
+            }
+            v = v + (Math.random() - 0.5) * 0.25;
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.cos(rad) * v,
+              vy: Math.sin(rad) * v,
+              ay: 0.02,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 1.5,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          return color;
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        function makeRandomFirework(fire) {
+          var color = randColor();
+          for (var i = 0; i < fireNumber * 5; i++) {
+            var firework = {
+              x: fire.x,
+              y: fire.y,
+              size: Math.random() + 1.5,
+              fill: color,
+              vx: Math.random() * 15 - 7.5,
+              vy: Math.random() * -15 + 5,
+              ay: 0.05,
+              alpha: 1,
+              life: Math.round((Math.random() * range) / 2) + range / 2,
+            };
+            firework.base = {
+              life: firework.life,
+              size: firework.size,
+            };
+            listFirework.push(firework);
+          }
+          return color;
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        function makeSpark(special) {
+          var color = special.fill;
+          var velocity = Math.random() * 6 + 12;
+          var max = fireNumber;
+          for (var i = 0; i < max; i++) {
+            var rad =
+              Math.random() * Math.PI * 0.3 +
+              Math.PI * 0.35 +
+              Math.PI +
+              special.direct;
+            var spark = {
+              x: special.x,
+              y: special.y,
+              size: Math.random() + 1,
+              fill: color,
+              vx: Math.cos(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              vy: Math.sin(rad) * velocity + (Math.random() - 0.5) * 0.5,
+              ay: 0.02,
+              alpha: 1,
+              rad: rad,
+              direct: special.direct,
+              chain: Math.round(Math.random() * 2) + 2,
+              life: Math.round((Math.random() * range) / 2) + range / 2,
+            };
+            spark.base = {
+              life: spark.life,
+              velocity: velocity,
+            };
+            listSpark.push(spark);
+          }
+          return color;
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        function chainSpark(parentSpark) {
+          var color = parentSpark.fill;
+          if (parentSpark.chain > 0) {
+            var velocity = parentSpark.base.velocity * 0.6;
+            var max = Math.round(Math.random() * 5);
+            for (var i = 0; i < max; i++) {
+              var rad =
+                Math.random() * Math.PI * 0.3 -
+                Math.PI * 0.15 +
+                parentSpark.rad +
+                parentSpark.direct;
+              var spark = {
+                x: parentSpark.x,
+                y: parentSpark.y,
+                size: parentSpark.size * 0.6,
+                fill: color,
+                vx: Math.cos(rad) * velocity + (Math.random() - 0.5) * 0.5,
+                vy: Math.sin(rad) * velocity + (Math.random() - 0.5) * 0.5,
+                ay: 0.02,
+                alpha: 1,
+                rad: rad,
+                direct: parentSpark.direct,
+                chain: parentSpark.chain,
+                life: parentSpark.base.life * 0.8,
+              };
+              spark.base = {
+                life: spark.life,
+                size: spark.size,
+                velocity: velocity,
+              };
+              listSpark.push(spark);
+            } /*if (Math.random() > 0.9 && parentSpark.chain > 1) { //Experimental feature of adding sound
+        // play sound
+        playExpSound();
+      }*/
+          }
+          return color;
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        (function loop() {
+          requestAnimationFrame(loop);
+          update();
+          draw();
+        })();
+
+        function update() {
+          // update fire logic
+          for (var i = 0; i < listFire.length; i++) {
+            var fire = listFire[i]; //
+            if (fire.y <= fire.far) {
+              // play sound
+              /*playExpSound();*/
+              // case add firework
+              fired++;
+              var color =
+                actions[Math.floor(Math.random() * actions.length)](fire); // light
+              lights.push({
+                x: fire.x,
+                y: fire.y,
+                color: color,
+                radius: range * 2,
+              }); // reset
+              fire.y = fire.base.y;
+              fire.x = fire.base.x; // special
+              if (fired % 33 == 0) {
+                initSpark();
+              } // on hold
+              supprise = fired % 100 == 0 ? true : supprise;
+              if (supprise) {
+                fire.vx = 0;
+                fire.vy = 0;
+                fire.ax = 0;
+                fire.hold = true;
+                onHold++;
+              } else {
+                fire.vx = fire.base.vx;
+                fire.vy = fire.base.vy;
+                fire.ax = Math.random() * 0.06 - 0.03; /*playLaunchSound();*/ // play sound
+              }
+            } // Fireworks by Tristan McCullen in 2017!
+            if (fire.hold && fire.delay <= 0) {
+              onHold--;
+              fire.hold = false;
+              fire.delay = Math.round(Math.random() * range) + range * 4;
+              fire.vx = fire.base.vx;
+              fire.vy = fire.base.vy;
+              fire.ax = Math.random() * 0.06 - 0.03;
+              fire.alpha = 1; /*playLaunchSound();*/ // play sound
+            } else if (fire.hold && fire.delay > 0) {
+              fire.delay--;
+            } else {
+              fire.x += fire.vx;
+              fire.y += fire.vy;
+              fire.vx += fire.ax;
+              fire.alpha = (fire.y - fire.far) / fire.far;
+            }
+          } // update firework logic
+
+          for (var i = listFirework.length - 1; i >= 0; i--) {
+            var firework = listFirework[i];
+            if (firework) {
+              firework.vx *= 0.9;
+              firework.vy *= 0.9;
+              firework.x += firework.vx;
+              firework.y += firework.vy;
+              firework.vy += firework.ay;
+              firework.alpha = firework.life / firework.base.life;
+              firework.size = firework.alpha * firework.base.size;
+              firework.alpha = firework.alpha > 0.6 ? 1 : firework.alpha; //
+              firework.life--;
+              if (firework.life <= 0) {
+                listFirework.splice(i, 1);
+              }
+            }
+          }
+        }
+        // Fireworks by Tristan McCullen in 2017!
+        function draw() {
+          // clear
+          ctx.globalCompositeOperation = "source-over";
+          ctx.globalAlpha = 0.2;
+          ctx.fillStyle = "#000003";
+          ctx.fillRect(0, 0, canvas.width, canvas.height); // re-draw
+
+          ctx.globalCompositeOperation = "screen";
+          for (var i = 0; i < listFire.length; i++) {
+            var fire = listFire[i];
+            ctx.globalAlpha = fire.alpha;
+            ctx.beginPath();
+            ctx.arc(fire.x, fire.y, fire.size, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fillStyle = fire.fill;
+            ctx.fill();
+          }
+
+          for (var i = 0; i < listFirework.length; i++) {
+            var firework = listFirework[i];
+            ctx.globalAlpha = firework.alpha;
+            ctx.beginPath();
+            ctx.arc(firework.x, firework.y, firework.size, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fillStyle = firework.fill;
+            ctx.fill();
+          }
+
+          for (var i = 0; i < listSpecial.length; i++) {
+            var special = listSpecial[i];
+            ctx.globalAlpha = special.alpha; // ctx.beginPath(); // ctx.arc(special.x, special.y, special.size, 0, Math.PI * 2); // ctx.closePath(); // ctx.fill();
+            ctx.fillStyle = special.fill;
+            ctx.fillRect(
+              special.x - special.size,
+              special.y - special.size,
+              special.size * 2,
+              special.size * 2
+            );
+          }
+          // Fireworks by Tristan McCullen in 2017!
+          for (var i = 0; i < listSpark.length; i++) {
+            var spark = listSpark[i];
+            ctx.globalAlpha = spark.alpha; /*ctx.beginPath(); //Special effect
+      ctx.arc(spark.x, spark.y, spark.size, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fill();*/
+            ctx.fillStyle = spark.fill;
+            ctx.fillRect(
+              spark.x - spark.size,
+              spark.y - spark.size,
+              spark.size * 2,
+              spark.size * 2
+            );
+          } // light effect
+
+          while (lights.length) {
+            var light = lights.pop();
+            var gradient = ctx.createRadialGradient(
+              light.x,
+              light.y,
+              0,
+              light.x,
+              light.y,
+              light.radius
+            );
+            gradient.addColorStop(0, "#fff");
+            gradient.addColorStop(0.2, light.color);
+            gradient.addColorStop(0.8, "rgba(0, 0, 0, 0)");
+            gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+            ctx.globalAlpha = light.alpha ? light.alpha : 0.25;
+            ctx.fillStyle = gradient;
+            ctx.fillRect(
+              light.x - light.radius,
+              light.y - light.radius,
+              light.radius * 2,
+              light.radius * 2
+            );
+          }
+        }
+      });
+    </script>
+
+  <audio controls autoplay>
+    <source src="https://wishesplus.com/wp-content/uploads/2021/02/Best-Happy-Birthday-To-You-Happy-Birthday-Songs-Remix-2021-WishesPlus.com_.mp3.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+  </audio>
+  </body>
+</html>

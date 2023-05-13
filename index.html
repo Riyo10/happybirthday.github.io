@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Mana</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+  <body>
+    <div class="container">
+      <h1>My  mana 👸💝, enter the secret code that manu  will tell you</h1>
+      <form id="password-form">
+        <label for="password">My kitkat 🍫 enter the code here 👇</label>
+        <input type="password" id="password" name="password">
+        <button type="submit">👻</button>
+      </form>
+      <div id="password-error" class="hidden">Incorrect code. Please try again.</div>
+      <div id="content" class="hidden">
+      </div>
+    </div>
+    <script>
+ const form = document.getElementById("password-form");
+const error = document.getElementById("password-error");
+const password = "nov3-jan4-may14";
+
+form.addEventListener("submit", function(event) {
+  event.preventDefault();
+  const passwordInput = document.getElementById("password").value;
+  if (passwordInput === password) {
+    // Navigate to the next page
+    window.location.href = "hom2.html";
+  } else {
+    error.classList.remove("hidden");
+  }
+});
+
+
+    </script>
+  </body>
+</html>
